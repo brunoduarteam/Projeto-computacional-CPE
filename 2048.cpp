@@ -6,12 +6,20 @@
 #include <cctype>
 #include <limits>
 #include <string>
+#include <vector>
 
 using namespace std;
 
 const int TAM = 4;
 const int META = 2048;
 const string ARQUIVO_RECORDES = "recordes.txt";
+
+struct Perfil
+{
+    string nome;
+    int recordeClassico;
+    int recordeDueto;
+};
 
 // --------------------------------------------------
 // Funcoes auxiliares de tela
@@ -30,39 +38,118 @@ void pausar()
 }
 
 // --------------------------------------------------
-// Recordes
+// Perfil do jogador e arquivo de recordes
 // --------------------------------------------------
 
-void carregarRecordes(int &recordeClassico, int &recordeDueto)
+Perfil criarPerfil()
+{
+    Perfil jogador;
+
+    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+
+    cout << "Digite seu nome: ";
+    getline(cin, jogador.nome);
+
+    if(jogador.nome == "")
+    {
+        jogador.nome = "Sem nome";
+    }
+
+    jogador.recordeClassico = 0;
+    jogador.recordeDueto = 0;
+
+    return jogador;
+}
+
+void carregarPerfil(Perfil &jogador)
 {
     ifstream arquivo(ARQUIVO_RECORDES);
 
     if(!arquivo)
     {
-        recordeClassico = 0;
-        recordeDueto = 0;
         return;
     }
 
-    arquivo >> recordeClassico >> recordeDueto;
+    Perfil perfilLido;
 
-    if(arquivo.fail())
+    while(getline(arquivo, perfilLido.nome))
     {
-        recordeClassico = 0;
-        recordeDueto = 0;
+        arquivo >> perfilLido.recordeClassico;
+        arquivo >> perfilLido.recordeDueto;
+
+        arquivo.ignore(numeric_limits<streamsize>::max(), '\n');
+
+        if(perfilLido.nome == jogador.nome)
+        {
+            jogador.recordeClassico = perfilLido.recordeClassico;
+            jogador.recordeDueto = perfilLido.recordeDueto;
+
+            arquivo.close();
+            return;
+        }
     }
 
     arquivo.close();
 }
 
-void salvarRecordes(int recordeClassico, int recordeDueto)
+void salvarPerfil(const Perfil &jogador)
 {
-    ofstream arquivo(ARQUIVO_RECORDES);
+    vector<Perfil> listaDePerfis;
 
-    arquivo << recordeClassico << endl;
-    arquivo << recordeDueto << endl;
+    ifstream arquivoEntrada(ARQUIVO_RECORDES);
 
-    arquivo.close();
+    if(arquivoEntrada)
+    {
+        Perfil perfilLido;
+
+        while(getline(arquivoEntrada, perfilLido.nome))
+        {
+            arquivoEntrada >> perfilLido.recordeClassico;
+            arquivoEntrada >> perfilLido.recordeDueto;
+
+            arquivoEntrada.ignore(numeric_limits<streamsize>::max(), '\n');
+
+            listaDePerfis.push_back(perfilLido);
+        }
+
+        arquivoEntrada.close();
+    }
+
+    bool perfilEncontrado = false;
+
+    for(int i = 0; i < listaDePerfis.size(); i++)
+    {
+        if(listaDePerfis[i].nome == jogador.nome)
+        {
+            listaDePerfis[i] = jogador;
+            perfilEncontrado = true;
+        }
+    }
+
+    if(!perfilEncontrado)
+    {
+        listaDePerfis.push_back(jogador);
+    }
+
+    ofstream arquivoSaida(ARQUIVO_RECORDES);
+
+    for(int i = 0; i < listaDePerfis.size(); i++)
+    {
+        arquivoSaida << listaDePerfis[i].nome << endl;
+        arquivoSaida << listaDePerfis[i].recordeClassico << endl;
+        arquivoSaida << listaDePerfis[i].recordeDueto << endl;
+    }
+
+    arquivoSaida.close();
+}
+
+Perfil prepararPerfil()
+{
+    Perfil jogador = criarPerfil();
+
+    carregarPerfil(jogador);
+
+    return jogador;
 }
 
 void atualizarRecorde(int pontuacao, int &recorde)
@@ -72,6 +159,34 @@ void atualizarRecorde(int pontuacao, int &recorde)
         recorde = pontuacao;
         cout << "\nNovo recorde!\n";
     }
+}
+
+vector<Perfil> carregarTodosPerfis()
+{
+    vector<Perfil> listaDePerfis;
+
+    ifstream arquivo(ARQUIVO_RECORDES);
+
+    if(!arquivo)
+    {
+        return listaDePerfis;
+    }
+
+    Perfil perfilLido;
+
+    while(getline(arquivo, perfilLido.nome))
+    {
+        arquivo >> perfilLido.recordeClassico;
+        arquivo >> perfilLido.recordeDueto;
+
+        arquivo.ignore(numeric_limits<streamsize>::max(), '\n');
+
+        listaDePerfis.push_back(perfilLido);
+    }
+
+    arquivo.close();
+
+    return listaDePerfis;
 }
 
 // --------------------------------------------------
@@ -132,8 +247,8 @@ void mostrarTabuleiro(const int tabuleiro[TAM][TAM])
 void mostrarDoisTabuleiros(const int tabuleiroA[TAM][TAM],
                            const int tabuleiroB[TAM][TAM])
 {
-    cout << setw(30) << left << "TABULEIRO A";
-    cout << "TABULEIRO B" << endl;
+    cout << left << setw(30) << "TABULEIRO A";
+    cout << "TABULEIRO B" << right << endl;
 
     for(int linha = 0; linha < TAM; linha++)
     {
@@ -430,24 +545,23 @@ bool executarMovimento(int tabuleiro[TAM][TAM], char comando, int &pontos)
 {
     comando = toupper(comando);
 
-    if(comando == 'A')
+    switch(comando)
     {
-        return moverEsquerda(tabuleiro, pontos);
-    }
-    else if(comando == 'D')
-    {
-        return moverDireita(tabuleiro, pontos);
-    }
-    else if(comando == 'W')
-    {
-        return moverCima(tabuleiro, pontos);
-    }
-    else if(comando == 'S')
-    {
-        return moverBaixo(tabuleiro, pontos);
-    }
+        case 'A':
+            return moverEsquerda(tabuleiro, pontos);
 
-    return false;
+        case 'D':
+            return moverDireita(tabuleiro, pontos);
+
+        case 'W':
+            return moverCima(tabuleiro, pontos);
+
+        case 'S':
+            return moverBaixo(tabuleiro, pontos);
+
+        default:
+            return false;
+    }
 }
 
 // --------------------------------------------------
@@ -537,7 +651,8 @@ void mostrarMenuPrincipal()
     cout << "=============================\n";
     cout << "1 - Novo Jogo\n";
     cout << "2 - Recordes\n";
-    cout << "3 - Sair\n";
+    cout << "3 - Regras\n";
+    cout << "4 - Sair\n";
     cout << "Escolha: ";
 }
 
@@ -552,15 +667,96 @@ void mostrarMenuNovoJogo()
     cout << "Escolha: ";
 }
 
-void mostrarRecordes(int recordeClassico, int recordeDueto)
+void mostrarRecordes()
+{
+    limparTela();
+
+    vector<Perfil> listaDePerfis = carregarTodosPerfis();
+
+    cout << "=============================\n";
+    cout << "           RECORDES\n";
+    cout << "=============================\n\n";
+
+    if(listaDePerfis.size() == 0)
+    {
+        cout << "Nenhum recorde salvo ainda.\n";
+    }
+    else
+    {
+        for(int i = 0; i < listaDePerfis.size(); i++)
+        {
+            cout << "Jogador: " << listaDePerfis[i].nome << endl;
+            cout << "Recorde Classico: " << listaDePerfis[i].recordeClassico << endl;
+            cout << "Recorde Dueto:    " << listaDePerfis[i].recordeDueto << endl;
+            cout << "-----------------------------\n";
+        }
+    }
+
+    pausar();
+}
+
+void mostrarRegras()
 {
     limparTela();
 
     cout << "=============================\n";
-    cout << "           RECORDES\n";
-    cout << "=============================\n";
-    cout << "Modo Classico: " << recordeClassico << endl;
-    cout << "Modo Dueto:    " << recordeDueto << endl;
+    cout << "            REGRAS\n";
+    cout << "=============================\n\n";
+
+    cout << "OBJETIVO GERAL\n";
+    cout << "O objetivo do jogo 2048 e combinar pecas de mesmo valor ate formar uma peca 2048.\n\n";
+
+    cout << "TABULEIRO\n";
+    cout << "- O jogo utiliza um tabuleiro 4x4.\n";
+    cout << "- Cada posicao pode estar vazia ou conter uma peca numerica.\n";
+    cout << "- As pecas seguem potencias de 2: 2, 4, 8, 16, 32, 64, etc.\n\n";
+
+    cout << "INICIO DA PARTIDA\n";
+    cout << "- Ao iniciar uma partida, o tabuleiro comeca vazio.\n";
+    cout << "- Duas pecas sao geradas aleatoriamente.\n";
+    cout << "- Cada nova peca pode ser 2 ou 4.\n";
+    cout << "- A chance de aparecer 2 e maior que a chance de aparecer 4.\n\n";
+
+    cout << "COMANDOS\n";
+    cout << "W - mover para cima\n";
+    cout << "A - mover para esquerda\n";
+    cout << "S - mover para baixo\n";
+    cout << "D - mover para direita\n";
+    cout << "Q - voltar ao menu durante a partida\n\n";
+
+    cout << "MOVIMENTACAO\n";
+    cout << "- Todas as pecas deslizam na direcao escolhida.\n";
+    cout << "- Pecas iguais que se encontram se fundem.\n";
+    cout << "- Exemplo: 2 + 2 gera 4.\n";
+    cout << "- Exemplo: 4 + 4 gera 8.\n";
+    cout << "- Uma peca criada por fusao nao pode se fundir novamente no mesmo movimento.\n\n";
+
+    cout << "PONTUACAO\n";
+    cout << "- A pontuacao aumenta de acordo com as fusoes.\n";
+    cout << "- Se duas pecas 2 formam uma peca 4, o jogador ganha 4 pontos.\n";
+    cout << "- Se duas pecas 8 formam uma peca 16, o jogador ganha 16 pontos.\n\n";
+
+    cout << "MODO CLASSICO\n";
+    cout << "- O jogador controla apenas um tabuleiro.\n";
+    cout << "- O objetivo e criar uma peca 2048.\n";
+    cout << "- A vitoria ocorre quando qualquer posicao do tabuleiro possui 2048.\n";
+    cout << "- A derrota ocorre quando o tabuleiro esta cheio e sem movimentos possiveis.\n\n";
+
+    cout << "MODO DUETO\n";
+    cout << "- O jogador controla dois tabuleiros ao mesmo tempo.\n";
+    cout << "- Um unico comando e aplicado aos dois tabuleiros.\n";
+    cout << "- O movimento so acontece se os dois tabuleiros mudarem.\n";
+    cout << "- Se apenas um tabuleiro puder se mover, a jogada e cancelada.\n";
+    cout << "- Quando a jogada e valida, uma nova peca surge em cada tabuleiro.\n";
+    cout << "- A pontuacao e conjunta, somando os pontos dos dois tabuleiros.\n";
+    cout << "- A vitoria ocorre apenas quando os dois tabuleiros possuem uma peca 2048.\n";
+    cout << "- A derrota ocorre quando pelo menos um dos tabuleiros trava.\n\n";
+
+    cout << "RECORDES\n";
+    cout << "- Antes de iniciar uma partida, o jogador informa seu nome.\n";
+    cout << "- O jogo procura se ja existe um perfil salvo com esse nome.\n";
+    cout << "- Cada jogador possui recorde separado para o modo classico e para o modo dueto.\n";
+    cout << "- Os recordes ficam armazenados no arquivo recordes.txt.\n";
 
     pausar();
 }
@@ -569,7 +765,7 @@ void mostrarRecordes(int recordeClassico, int recordeDueto)
 // Modo Classico
 // --------------------------------------------------
 
-void jogarClassico(int &recordeClassico)
+void jogarClassico(Perfil &jogador)
 {
     int tabuleiro[TAM][TAM];
     int pontuacao = 0;
@@ -581,15 +777,17 @@ void jogarClassico(int &recordeClassico)
         limparTela();
 
         cout << "========== MODO CLASSICO ==========\n";
+        cout << "Jogador:   " << jogador.nome << endl;
         cout << "Pontuacao: " << pontuacao << endl;
-        cout << "Recorde:   " << recordeClassico << endl;
+        cout << "Recorde:   " << jogador.recordeClassico << endl;
 
         mostrarTabuleiro(tabuleiro);
 
         if(possuiValor(tabuleiro, META))
         {
             cout << "Parabens! Voce venceu!\n";
-            atualizarRecorde(pontuacao, recordeClassico);
+            atualizarRecorde(pontuacao, jogador.recordeClassico);
+            salvarPerfil(jogador);
             pausar();
             break;
         }
@@ -597,7 +795,8 @@ void jogarClassico(int &recordeClassico)
         if(estaTravado(tabuleiro))
         {
             cout << "Game Over!\n";
-            atualizarRecorde(pontuacao, recordeClassico);
+            atualizarRecorde(pontuacao, jogador.recordeClassico);
+            salvarPerfil(jogador);
             pausar();
             break;
         }
@@ -615,7 +814,8 @@ void jogarClassico(int &recordeClassico)
 
         if(comando == 'Q')
         {
-            atualizarRecorde(pontuacao, recordeClassico);
+            atualizarRecorde(pontuacao, jogador.recordeClassico);
+            salvarPerfil(jogador);
             break;
         }
 
@@ -646,7 +846,7 @@ void jogarClassico(int &recordeClassico)
 // Modo Dueto
 // --------------------------------------------------
 
-void jogarDueto(int &recordeDueto)
+void jogarDueto(Perfil &jogador)
 {
     int tabuleiroA[TAM][TAM];
     int tabuleiroB[TAM][TAM];
@@ -661,15 +861,17 @@ void jogarDueto(int &recordeDueto)
         limparTela();
 
         cout << "============ MODO DUETO ============\n";
+        cout << "Jogador:            " << jogador.nome << endl;
         cout << "Pontuacao conjunta: " << pontuacao << endl;
-        cout << "Recorde dueto:      " << recordeDueto << endl << endl;
+        cout << "Recorde dueto:      " << jogador.recordeDueto << endl << endl;
 
         mostrarDoisTabuleiros(tabuleiroA, tabuleiroB);
 
         if(possuiValor(tabuleiroA, META) && possuiValor(tabuleiroB, META))
         {
             cout << "Parabens! Os dois tabuleiros chegaram em 2048!\n";
-            atualizarRecorde(pontuacao, recordeDueto);
+            atualizarRecorde(pontuacao, jogador.recordeDueto);
+            salvarPerfil(jogador);
             pausar();
             break;
         }
@@ -677,7 +879,8 @@ void jogarDueto(int &recordeDueto)
         if(estaTravado(tabuleiroA) || estaTravado(tabuleiroB))
         {
             cout << "Game Over! Pelo menos um dos tabuleiros travou.\n";
-            atualizarRecorde(pontuacao, recordeDueto);
+            atualizarRecorde(pontuacao, jogador.recordeDueto);
+            salvarPerfil(jogador);
             pausar();
             break;
         }
@@ -695,7 +898,8 @@ void jogarDueto(int &recordeDueto)
 
         if(comando == 'Q')
         {
-            atualizarRecorde(pontuacao, recordeDueto);
+            atualizarRecorde(pontuacao, jogador.recordeDueto);
+            salvarPerfil(jogador);
             break;
         }
 
@@ -738,17 +942,67 @@ void jogarDueto(int &recordeDueto)
 }
 
 // --------------------------------------------------
+// Funcoes chamadas pelo switch case
+// --------------------------------------------------
+
+void menuNovoJogo()
+{
+    bool voltar = false;
+
+    while(!voltar)
+    {
+        limparTela();
+
+        mostrarMenuNovoJogo();
+
+        int escolhaModo = lerOpcao();
+
+        switch(escolhaModo)
+        {
+            case 1:
+            {
+                Perfil jogador = prepararPerfil();
+                jogarClassico(jogador);
+                salvarPerfil(jogador);
+                break;
+            }
+
+            case 2:
+            {
+                Perfil jogador = prepararPerfil();
+                jogarDueto(jogador);
+                salvarPerfil(jogador);
+                break;
+            }
+
+            case 3:
+            {
+                voltar = true;
+                break;
+            }
+
+            default:
+            {
+                cout << "\nOpcao invalida.\n";
+                pausar();
+                break;
+            }
+        }
+    }
+}
+
+void sairDoJogo(bool &sair)
+{
+    sair = true;
+}
+
+// --------------------------------------------------
 // Main
 // --------------------------------------------------
 
 int main()
 {
     srand(time(NULL));
-
-    int recordeClassico;
-    int recordeDueto;
-
-    carregarRecordes(recordeClassico, recordeDueto);
 
     bool sair = false;
 
@@ -760,52 +1014,38 @@ int main()
 
         int opcao = lerOpcao();
 
-        if(opcao == 1)
+        switch(opcao)
         {
-            bool voltar = false;
-
-            while(!voltar)
+            case 1:
             {
-                limparTela();
-
-                mostrarMenuNovoJogo();
-
-                int escolhaModo = lerOpcao();
-
-                if(escolhaModo == 1)
-                {
-                    jogarClassico(recordeClassico);
-                    salvarRecordes(recordeClassico, recordeDueto);
-                }
-                else if(escolhaModo == 2)
-                {
-                    jogarDueto(recordeDueto);
-                    salvarRecordes(recordeClassico, recordeDueto);
-                }
-                else if(escolhaModo == 3)
-                {
-                    voltar = true;
-                }
-                else
-                {
-                    cout << "\nOpcao invalida.\n";
-                    pausar();
-                }
+                menuNovoJogo();
+                break;
             }
-        }
-        else if(opcao == 2)
-        {
-            mostrarRecordes(recordeClassico, recordeDueto);
-        }
-        else if(opcao == 3)
-        {
-            salvarRecordes(recordeClassico, recordeDueto);
-            sair = true;
-        }
-        else
-        {
-            cout << "\nOpcao invalida.\n";
-            pausar();
+
+            case 2:
+            {
+                mostrarRecordes();
+                break;
+            }
+
+            case 3:
+            {
+                mostrarRegras();
+                break;
+            }
+
+            case 4:
+            {
+                sairDoJogo(sair);
+                break;
+            }
+
+            default:
+            {
+                cout << "\nOpcao invalida.\n";
+                pausar();
+                break;
+            }
         }
     }
 
