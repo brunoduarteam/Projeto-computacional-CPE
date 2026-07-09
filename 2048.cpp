@@ -215,7 +215,7 @@ void copiarTabuleiro(const int origem[TAM][TAM], int destino[TAM][TAM]) //copia 
     }
 }
 
-void mostrarCelula(int valor)
+void mostrarCelula(int valor) // troca os 0s por "." 
 {
     if(valor == 0)
     {
@@ -227,11 +227,11 @@ void mostrarCelula(int valor)
     }
 }
 
-void mostrarTabuleiro(const int tabuleiro[TAM][TAM])
+void mostrarTabuleiro(const int tabuleiro[TAM][TAM]) //mostra o tabuleiro na tela, com as pecas e os "." 
 {
     cout << endl;
 
-    for(int linha = 0; linha < TAM; linha++)
+    for(int linha = 0; linha < TAM; linha++) 
     {
         for(int coluna = 0; coluna < TAM; coluna++)
         {
@@ -274,7 +274,7 @@ void mostrarDoisTabuleiros(const int tabuleiroA[TAM][TAM],
 // Pecas aleatorias
 // --------------------------------------------------
 
-int contarVazios(const int tabuleiro[TAM][TAM])
+int contarVazios(const int tabuleiro[TAM][TAM]) //conta quantas posições vazias existem no tabuleiro
 {
     int quantidade = 0;
 
@@ -292,7 +292,7 @@ int contarVazios(const int tabuleiro[TAM][TAM])
     return quantidade;
 }
 
-void gerarPeca(int tabuleiro[TAM][TAM])
+void gerarPeca(int tabuleiro[TAM][TAM]) //cria uma nova peca aleatoria no tabuleiro
 {
     int vazios = contarVazios(tabuleiro);
 
@@ -330,7 +330,7 @@ void gerarPeca(int tabuleiro[TAM][TAM])
     }
 }
 
-void iniciarPartida(int tabuleiro[TAM][TAM])
+void iniciarPartida(int tabuleiro[TAM][TAM]) //chama outras funções para iniciar a partida
 {
     inicializarTabuleiro(tabuleiro);
 
@@ -342,52 +342,52 @@ void iniciarPartida(int tabuleiro[TAM][TAM])
 // Movimentacao de linhas
 // --------------------------------------------------
 
-void compactarLinha(int linha[TAM])
+void compactarLinha(int linha[TAM]) //compacta a linha, movendo todos os valores para a esquerda e preenchendo com zeros à direita
 {
-    int auxiliar[TAM] = {0};
-    int indice = 0;
+    int auxiliar[TAM] = {0}; 
+    int indice = 0; 
 
-    for(int i = 0; i < TAM; i++)
+    for(int i = 0; i < TAM; i++)  //percorre a linha original 
     {
-        if(linha[i] != 0)
+        if(linha[i] != 0) // se o valor da posição não for zero, ele é adicionado ao vetor auxiliar na próxima posição disponível
         {
-            auxiliar[indice] = linha[i];
-            indice++;
+            auxiliar[indice] = linha[i]; //Copia o número encontrado para a próxima posição livre do vetor auxiliar.
+            indice++;   //Depois de colocar um número no vetor auxiliar, o índice avança para a próxima posição.
         }
     }
 
-    for(int i = 0; i < TAM; i++)
+    for(int i = 0; i < TAM; i++) //copia o resultado do vetor auxiliar de volta para a linha original.
     {
         linha[i] = auxiliar[i];
     }
 }
 
-int combinarLinha(int linha[TAM])
+int combinarLinha(int linha[TAM]) // Funcao que combina pecas iguais em uma linha e retorna os pontos ganhos
 {
     int pontosGanhos = 0;
 
-    for(int i = 0; i < TAM - 1; i++)
+    for(int i = 0; i < TAM - 1; i++) // Percorre a linha ate a penultima posicao
     {
-        if(linha[i] != 0 && linha[i] == linha[i + 1])
+        if(linha[i] != 0 && linha[i] == linha[i + 1])  // Verifica se a posicao atual nao esta vazia e se e igual a proxima posicao
         {
-            linha[i] = linha[i] * 2;
-            linha[i + 1] = 0;
+            linha[i] = linha[i] * 2; // Dobra o valor da peca atual, formando uma nova peca
+            linha[i + 1] = 0; // Zera a proxima posicao, pois ela foi usada na fusao
 
-            pontosGanhos += linha[i];
+            pontosGanhos += linha[i]; // Soma o valor da nova peca aos pontos ganhos
         }
     }
 
     return pontosGanhos;
 }
 
-void inverterLinha(int linha[TAM])
+void inverterLinha(int linha[TAM]) // Funcao que inverte a ordem dos valores de uma linha
 {
-    for(int i = 0; i < TAM / 2; i++)
+    for(int i = 0; i < TAM / 2; i++) // Percorre apenas metade da linha
     {
-        int auxiliar = linha[i];
+        int auxiliar = linha[i]; // Guarda temporariamente o valor da posicao atual
 
-        linha[i] = linha[TAM - 1 - i];
-        linha[TAM - 1 - i] = auxiliar;
+        linha[i] = linha[TAM - 1 - i]; // Coloca na posicao atual o valor da posicao oposta
+        linha[TAM - 1 - i] = auxiliar; // Coloca na posicao oposta o valor que estava guardado
     }
 }
 
@@ -395,28 +395,28 @@ void inverterLinha(int linha[TAM])
 // Movimentos horizontais
 // --------------------------------------------------
 
-bool moverEsquerda(int tabuleiro[TAM][TAM], int &pontos)
+bool moverEsquerda(int tabuleiro[TAM][TAM], int &pontos) //move todas as linhas do tabuleiro para a esquerda e combina pecas iguais 
 {
-    bool mudou = false;
+    bool mudou = false; // Indica se algum valor do tabuleiro foi alterado durante o movimento
 
     for(int linha = 0; linha < TAM; linha++)
     {
-        int antes[TAM];
+        int antes[TAM]; // Vetor usado para guardar a linha antes do movimento
 
-        for(int coluna = 0; coluna < TAM; coluna++)
+        for(int coluna = 0; coluna < TAM; coluna++) // Copia a linha atual antes de altera-la
         {
-            antes[coluna] = tabuleiro[linha][coluna];
+            antes[coluna] = tabuleiro[linha][coluna]; // Guarda o valor original da posicao
         }
 
-        compactarLinha(tabuleiro[linha]);
-        pontos += combinarLinha(tabuleiro[linha]);
-        compactarLinha(tabuleiro[linha]);
+        compactarLinha(tabuleiro[linha]);           //compacta
+        pontos += combinarLinha(tabuleiro[linha]);  //combina 
+        compactarLinha(tabuleiro[linha]);           //compacta de novo
 
-        for(int coluna = 0; coluna < TAM; coluna++)
+        for(int coluna = 0; coluna < TAM; coluna++) // Compara a linha antes e depois do movimento
         {
-            if(antes[coluna] != tabuleiro[linha][coluna])
+            if(antes[coluna] != tabuleiro[linha][coluna]) // Verifica se alguma posicao mudou
             {
-                mudou = true;
+                mudou = true; // Marca que o movimento foi valido, pois alterou o tabuleiro
             }
         }
     }
@@ -424,7 +424,7 @@ bool moverEsquerda(int tabuleiro[TAM][TAM], int &pontos)
     return mudou;
 }
 
-bool moverDireita(int tabuleiro[TAM][TAM], int &pontos)
+bool moverDireita(int tabuleiro[TAM][TAM], int &pontos) // Move todas as linhas do tabuleiro para a direita
 {
     bool mudou = false;
 
@@ -437,13 +437,13 @@ bool moverDireita(int tabuleiro[TAM][TAM], int &pontos)
             antes[coluna] = tabuleiro[linha][coluna];
         }
 
-        inverterLinha(tabuleiro[linha]);
+        inverterLinha(tabuleiro[linha]);  // Inverte a linha para reutilizar a logica do movimento para a esquerd
 
-        compactarLinha(tabuleiro[linha]);
+        compactarLinha(tabuleiro[linha]); 
         pontos += combinarLinha(tabuleiro[linha]);
         compactarLinha(tabuleiro[linha]);
 
-        inverterLinha(tabuleiro[linha]);
+        inverterLinha(tabuleiro[linha]); // Inverte a linha novamente, concluindo o movimento para a direita
 
         for(int coluna = 0; coluna < TAM; coluna++)
         {
@@ -461,15 +461,16 @@ bool moverDireita(int tabuleiro[TAM][TAM], int &pontos)
 // Movimentos verticais
 // --------------------------------------------------
 
-void copiarColuna(const int tabuleiro[TAM][TAM], int coluna, int vetor[TAM])
+void copiarColuna(const int tabuleiro[TAM][TAM], int coluna, int vetor[TAM]) // Copia uma coluna do tabuleiro para um vetor
 {
-    for(int linha = 0; linha < TAM; linha++)
+    for(int linha = 0; linha < TAM; linha++) // Percorre todas as linhas da coluna escolhida
     {
-        vetor[linha] = tabuleiro[linha][coluna];
+        vetor[linha] = tabuleiro[linha][coluna]; // Copia o valor da coluna para a mesma posicao no vetor
     }
 }
 
-void salvarColuna(int tabuleiro[TAM][TAM], int coluna, int vetor[TAM])
+void salvarColuna(int tabuleiro[TAM][TAM], int coluna, int vetor[TAM]) // Copia os valores de um vetor de volta para uma coluna do tabuleiro
+
 {
     for(int linha = 0; linha < TAM; linha++)
     {
@@ -477,7 +478,37 @@ void salvarColuna(int tabuleiro[TAM][TAM], int coluna, int vetor[TAM])
     }
 }
 
-bool moverCima(int tabuleiro[TAM][TAM], int &pontos)
+bool moverCima(int tabuleiro[TAM][TAM], int &pontos) // move todas as colunas do tabuleiro para cima e combina pecas iguais
+{
+    bool mudou = false; // confere se algum valor do tabuleiro foi alterado durante o movimento
+
+    for(int coluna = 0; coluna < TAM; coluna++) //percorre todas as colunas do tabuleiro
+    {
+        int antes[TAM]; // guarda a coluna antes do movimento
+        int vetor[TAM]; // vetor que recebe a coluna para ser manipulada
+
+        copiarColuna(tabuleiro, coluna, antes); //salva a coluna original antes de mudar
+        copiarColuna(tabuleiro, coluna, vetor); // copia a coluna para o vetor que sera alterado
+
+        compactarLinha(vetor);          //compacta
+        pontos += combinarLinha(vetor); //combina
+        compactarLinha(vetor);          //compacta de novo
+
+        salvarColuna(tabuleiro, coluna, vetor); 
+
+        for(int linha = 0; linha < TAM; linha++)
+        {
+            if(antes[linha] != vetor[linha])
+            {
+                mudou = true;
+            }
+        }
+    }
+
+    return mudou;
+}
+
+bool moverBaixo(int tabuleiro[TAM][TAM], int &pontos) // move todas as colunas do tabuleiro para baixo 
 {
     bool mudou = false;
 
@@ -489,9 +520,13 @@ bool moverCima(int tabuleiro[TAM][TAM], int &pontos)
         copiarColuna(tabuleiro, coluna, antes);
         copiarColuna(tabuleiro, coluna, vetor);
 
+        inverterLinha(vetor);  //inverte a coluna para reutilizar a logica do movimento para cima
+
         compactarLinha(vetor);
         pontos += combinarLinha(vetor);
         compactarLinha(vetor);
+
+        inverterLinha(vetor);  //inverte a coluna novamente, concluindo o movimento para baixo
 
         salvarColuna(tabuleiro, coluna, vetor);
 
@@ -507,41 +542,7 @@ bool moverCima(int tabuleiro[TAM][TAM], int &pontos)
     return mudou;
 }
 
-bool moverBaixo(int tabuleiro[TAM][TAM], int &pontos)
-{
-    bool mudou = false;
-
-    for(int coluna = 0; coluna < TAM; coluna++)
-    {
-        int antes[TAM];
-        int vetor[TAM];
-
-        copiarColuna(tabuleiro, coluna, antes);
-        copiarColuna(tabuleiro, coluna, vetor);
-
-        inverterLinha(vetor);
-
-        compactarLinha(vetor);
-        pontos += combinarLinha(vetor);
-        compactarLinha(vetor);
-
-        inverterLinha(vetor);
-
-        salvarColuna(tabuleiro, coluna, vetor);
-
-        for(int linha = 0; linha < TAM; linha++)
-        {
-            if(antes[linha] != vetor[linha])
-            {
-                mudou = true;
-            }
-        }
-    }
-
-    return mudou;
-}
-
-bool executarMovimento(int tabuleiro[TAM][TAM], char comando, int &pontos)
+bool executarMovimento(int tabuleiro[TAM][TAM], char comando, int &pontos) //executa o movimento correspondente ao comando recebido, chamando a função apropriada 
 {
     comando = toupper(comando);
 
@@ -568,7 +569,7 @@ bool executarMovimento(int tabuleiro[TAM][TAM], char comando, int &pontos)
 // Vitoria e derrota
 // --------------------------------------------------
 
-bool possuiValor(const int tabuleiro[TAM][TAM], int valor)
+bool possuiValor(const int tabuleiro[TAM][TAM], int valor) //verifica se o tabuleiro possui alguma peca com o valor especificado
 {
     for(int linha = 0; linha < TAM; linha++)
     {
@@ -584,7 +585,7 @@ bool possuiValor(const int tabuleiro[TAM][TAM], int valor)
     return false;
 }
 
-bool existeFusaoPossivel(const int tabuleiro[TAM][TAM])
+bool existeFusaoPossivel(const int tabuleiro[TAM][TAM]) //verifica se existe alguma peça igual adjacente
 {
     for(int linha = 0; linha < TAM; linha++)
     {
@@ -611,7 +612,7 @@ bool existeFusaoPossivel(const int tabuleiro[TAM][TAM])
     return false;
 }
 
-bool estaTravado(const int tabuleiro[TAM][TAM])
+bool estaTravado(const int tabuleiro[TAM][TAM]) //verifica se o tabuleiro está travado 
 {
     if(contarVazios(tabuleiro) > 0)
     {
