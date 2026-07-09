@@ -25,12 +25,12 @@ struct Perfil
 // Funcoes auxiliares de tela
 // --------------------------------------------------
 
-void limparTela()
+void limparTela() //limpa a tela do console
 {
-    cout << string(40, '\n');
+     system("cls");
 }
 
-void pausar()
+void pausar()   //impede que o programa mude de tela até o usuario apertar enter
 {
     cout << "\nPressione ENTER para continuar...";
     cin.ignore(numeric_limits<streamsize>::max(), '\n');
@@ -41,7 +41,7 @@ void pausar()
 // Perfil do jogador e arquivo de recordes
 // --------------------------------------------------
 
-Perfil criarPerfil()
+Perfil criarPerfil()  //utiliza o struct pra criar um perfil do jogador, com nome e recordes zerados
 {
     Perfil jogador;
 
@@ -61,7 +61,7 @@ Perfil criarPerfil()
     return jogador;
 }
 
-void carregarPerfil(Perfil &jogador)
+void carregarPerfil(Perfil &jogador)  //procurar o perfil do jogador no arquivo de recordes e carregar os recordes salvos
 {
     ifstream arquivo(ARQUIVO_RECORDES);
 
@@ -92,7 +92,7 @@ void carregarPerfil(Perfil &jogador)
     arquivo.close();
 }
 
-void salvarPerfil(const Perfil &jogador)
+void salvarPerfil(const Perfil &jogador) //salva no arquivo os dados do jogador atualizados, seja um novo recorde ou um novo jogador
 {
     vector<Perfil> listaDePerfis;
 
@@ -143,7 +143,7 @@ void salvarPerfil(const Perfil &jogador)
     arquivoSaida.close();
 }
 
-Perfil prepararPerfil()
+Perfil prepararPerfil() //cria o jogador que vai jogar a partida e carrega os recordes salvos, caso existam
 {
     Perfil jogador = criarPerfil();
 
@@ -152,7 +152,7 @@ Perfil prepararPerfil()
     return jogador;
 }
 
-void atualizarRecorde(int pontuacao, int &recorde)
+void atualizarRecorde(int pontuacao, int &recorde) //atualiza o recorde do jogador caso a pontuacao da partida seja maior que o recorde
 {
     if(pontuacao > recorde)
     {
@@ -161,7 +161,7 @@ void atualizarRecorde(int pontuacao, int &recorde)
     }
 }
 
-vector<Perfil> carregarTodosPerfis()
+vector<Perfil> carregarTodosPerfis() //usado na função recordes, le todos os jogadores salvos no arquivo e os coloca em uma lista de perfis
 {
     vector<Perfil> listaDePerfis;
 
@@ -193,7 +193,7 @@ vector<Perfil> carregarTodosPerfis()
 // Tabuleiro
 // --------------------------------------------------
 
-void inicializarTabuleiro(int tabuleiro[TAM][TAM])
+void inicializarTabuleiro(int tabuleiro[TAM][TAM])  //inicializa o tabuleiro com todas as posições vazias 
 {
     for(int linha = 0; linha < TAM; linha++)
     {
@@ -204,7 +204,7 @@ void inicializarTabuleiro(int tabuleiro[TAM][TAM])
     }
 }
 
-void copiarTabuleiro(const int origem[TAM][TAM], int destino[TAM][TAM])
+void copiarTabuleiro(const int origem[TAM][TAM], int destino[TAM][TAM]) //copia todos os valores de uma matri para a outra
 {
     for(int linha = 0; linha < TAM; linha++)
     {
@@ -630,20 +630,6 @@ bool estaTravado(const int tabuleiro[TAM][TAM])
 // Menus
 // --------------------------------------------------
 
-int lerOpcao()
-{
-    int opcao;
-
-    while(!(cin >> opcao))
-    {
-        cin.clear();
-        cin.ignore(numeric_limits<streamsize>::max(), '\n');
-        cout << "Digite uma opcao valida: ";
-    }
-
-    return opcao;
-}
-
 void mostrarMenuPrincipal()
 {
     cout << "=============================\n";
@@ -955,7 +941,8 @@ void menuNovoJogo()
 
         mostrarMenuNovoJogo();
 
-        int escolhaModo = lerOpcao();
+        int escolhaModo;
+        cin >> escolhaModo;
 
         switch(escolhaModo)
         {
@@ -1012,7 +999,8 @@ int main()
 
         mostrarMenuPrincipal();
 
-        int opcao = lerOpcao();
+        int opcao;
+        cin >> opcao;
 
         switch(opcao)
         {
