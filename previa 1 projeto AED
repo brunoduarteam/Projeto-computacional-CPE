@@ -1,0 +1,282 @@
+#include <iostream>
+#include <string>
+#include <list>
+using namespace std;
+
+
+    class Item {   //classe dos itens do que pode estar dentro do acervo 
+private:
+    int id;
+    string titulo;
+    bool disponivel;
+
+
+public:
+    Item(int novoId, string novoTitulo) { // esse e o construtor e nesse caso serve para facilitar a criacao de um novo item
+        id = novoId;
+        titulo = novoTitulo;
+        disponivel = true;
+    }
+
+     int getId() { // aqui pegamos o id e retornamos ele 
+        return id;
+    }
+
+    string getTitulo() { 
+        return titulo;
+    }
+
+    bool estaDisponivel() { //ultilizamos bool pois ele so e verdadeiro ou falso
+        return disponivel;
+    }
+
+     void setDisponivel(bool novoStatus) { // aqui criamos o setdisponivel para alterar o disponivel (se esta ou nao disponivel)
+        disponivel = novoStatus;
+    }
+    
+    virtual void mostrarDados() {
+    cout << "ID: " << id << endl;
+    cout << "Titulo: " << titulo << endl;
+}
+
+};  
+
+
+
+class Livro : public Item {  // livro herda item
+private:
+    string autor;
+
+public:
+    Livro(int novoId, string novoTitulo, string novoAutor)
+        : Item(novoId, novoTitulo) // chama o construtor da classe Item para inicializar a parte de Item que existe dentro de Livro
+    {
+        autor = novoAutor;
+    }
+      string getAutor() { //pega o nome e retorna
+        return autor;
+    } 
+
+    void mostrarDados() override {
+    cout << "ID: " << getId() << endl;
+    cout << "Titulo: " << getTitulo() << endl;
+    cout << "Autor: " << autor << endl;
+}
+
+};
+
+class Revista : public Item {
+private:
+    int edicao;
+
+public:
+    Revista(int novoId, string novoTitulo, int novaEdicao)
+        : Item(novoId, novoTitulo) // chama o construtor da classe Item para inicializar a parte de Item que existe dentro de Revista
+    {
+        edicao = novaEdicao;
+    }
+
+    int getEdicao() {
+        return edicao;
+    }
+
+    void mostrarDados() override {
+    cout << "ID: " << getId() << endl;
+    cout << "Titulo: " << getTitulo() << endl;
+    cout << "Edicao: " << edicao << endl;
+}
+};
+
+class Ebook : public Item {
+private:
+    string formato;
+
+public:
+
+    Ebook(int novoId, string novoTitulo, string novoFormato)
+        : Item(novoId, novoTitulo)
+    {
+        formato = novoFormato;
+    }
+
+    string getFormato() {
+        return formato;
+    }
+};
+
+class Aluno : public Usuario {
+private:
+    string matricula;
+
+public:
+
+    Aluno(int novoId, string novoNome, string novaMatricula)
+        : Usuario(novoId, novoNome)
+    {
+        matricula = novaMatricula;
+    }
+
+    string getMatricula() {
+        return matricula;
+    }
+
+    void mostrarDados() override {
+    cout << "ID: " << getId() << endl;
+    cout << "Nome: " << getNome() << endl;
+    cout << "Matricula: " << matricula << endl;
+}
+
+};
+
+
+// ==================== PROFESSOR ====================
+
+class Professor : public Usuario {
+private:
+    string departamento;
+
+public:
+
+    Professor(int novoId, string novoNome, string novoDepartamento)
+        : Usuario(novoId, novoNome)
+    {
+        departamento = novoDepartamento;
+    }
+
+    string getDepartamento() {
+        return departamento;
+    }
+     virtual void mostrarDados() {
+    cout << "ID: " << id << endl;
+    cout << "Nome: " << nome << endl;
+    cout << "Departamento: " << departamento << endl;
+}
+
+};
+
+class GerenciadorUsuarios {
+private:
+    list<Usuario*> usuarios;
+
+public:
+
+    void adicionarUsuario(Usuario* usuario) {
+        usuarios.push_back(usuario);
+    }
+
+    void listarUsuarios() {
+
+    for (Usuario* usuario : usuarios) {
+        usuario->mostrarDados();
+        cout << "--------------------" << endl;
+    }
+}
+
+};
+
+
+class Acervo {
+private:
+
+    list<Item*> itens; // cria uma lista de ponteiros para Item, permitindo armazenar diferentes tipos de itens (Livro, Revista, Ebook) no mesmo acervo
+
+public:
+
+    void adicionarItem(Item* item) { // adiciona um ponteiro para Item na lista de itens
+        itens.push_back(item); // adiciona o item no final da lista
+    }
+
+
+   void listarItens() {
+
+    for (Item* item : itens) {
+        item->mostrarDados();
+        cout << "--------------------" << endl;
+    }
+}
+
+
+    void buscarItem(int idBuscado) {
+
+        bool encontrado = false;
+
+        for (Item* item : itens) { // percorre a lista de ponteiros para Item e verifica se o ID do item corresponde ao ID buscado
+
+            if (item->getId() == idBuscado) {
+
+                encontrado = true;
+
+                cout << "Item encontrado!" << endl;
+                item->mostrarDados();
+
+                break;
+            }
+        }
+
+        if (!encontrado) {
+            cout << "Item nao encontrado!" << endl;
+        }
+    }
+
+     Item* encontrarItem(int idBuscado) {
+
+        for (Item* item : itens) {
+
+            if (item->getId() == idBuscado) {
+
+                return item;
+            }
+        }
+
+        return nullptr;
+    }
+
+};   // até aqui compila 
+
+
+int main() {
+
+    Acervo acervo;
+    GerenciadorUsuarios gerenciador;
+
+    int opcao;
+
+    int proximoIdUsuario = 1;
+    int proximoIdItem = 1;
+
+
+    do {
+
+        cout << endl;
+        cout << "===== SISTEMA DA BIBLIOTECA =====" << endl;
+
+        cout << "1 - Cadastrar aluno" << endl;
+        cout << "2 - Cadastrar professor" << endl;
+        cout << "3 - Listar usuarios" << endl;
+
+        cout << "4 - Cadastrar livro" << endl;
+        cout << "5 - Cadastrar revista" << endl;
+        cout << "6 - Cadastrar ebook" << endl;
+
+        cout << "7 - Listar acervo" << endl;
+        cout << "8 - Buscar item" << endl;
+
+        cout << "0 - Sair" << endl;
+
+        cout << endl;
+        cout << "Escolha uma opcao: ";
+
+        cin >> opcao;
+
+
+
+    return 0;
+}
+
+}
+
+
+
+
+
+
