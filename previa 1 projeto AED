@@ -196,27 +196,27 @@ public:
 }
 
 
-    void buscarItem(int idBuscado) {
+   // void buscarItem(int idBuscado) {
 
-        bool encontrado = false;
+     //   bool encontrado = false;
 
-        for (Item* item : itens) { // percorre a lista de ponteiros para Item e verifica se o ID do item corresponde ao ID buscado
+       // for (Item* item : itens) { // percorre a lista de ponteiros para Item e verifica se o ID do item corresponde ao ID buscado
 
-            if (item->getId() == idBuscado) {
+       //     if (item->getId() == idBuscado) {
 
-                encontrado = true;
+         //       encontrado = true;
 
-                cout << "Item encontrado!" << endl;
-                item->mostrarDados();
+           //     cout << "Item encontrado!" << endl;
+             //   item->mostrarDados();
 
-                break;
-            }
-        }
+               // break;
+           // }
+       // }
 
-        if (!encontrado) {
-            cout << "Item nao encontrado!" << endl;
-        }
-    }
+       // if (!encontrado) {
+        //    cout << "Item nao encontrado!" << endl;
+      //  }
+   // }
 
      Item* encontrarItem(int idBuscado) {
 
@@ -231,7 +231,7 @@ public:
         return nullptr;
     }
 
-};   // até aqui compila 
+};   // até aqui está blz
 
 
 int main() {
