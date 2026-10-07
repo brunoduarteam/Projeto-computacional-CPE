@@ -218,17 +218,17 @@ public:
       //  }
    // }
 
-     Item* encontrarItem(int idBuscado) {
+   //  Item* encontrarItem(int idBuscado) {
+//
+     //   for (Item* item : itens) {
 
-        for (Item* item : itens) {
+         //   if (item->getId() == idBuscado) {
 
-            if (item->getId() == idBuscado) {
-
-                return item;
+             //   return item;
             }
         }
 
-        return nullptr;
+       // return nullptr;
     }
 
 };   // até aqui está blz
